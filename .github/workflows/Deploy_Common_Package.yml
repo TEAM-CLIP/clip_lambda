@@ -1,0 +1,48 @@
+name: Deploy Common Package
+
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'common/**'
+      - '.github/workflows/Deploy_Common_Package.yml'
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+
+    env:
+      REGISTRY: "public.ecr.aws/o1r5t7k5/chiksnap"
+      IMAGE_NAME: "common/python"
+      TAG: "3.9"
+
+
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v2
+
+        - name: Configure AWS Credentials For ECR
+          uses: aws-actions/configure-aws-credentials@v1
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: "ap-northeast-2"
+
+        - name: Login to Amazon ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v1
+
+        - name: Build, tag, and push docker image to ECR
+          id: build-image
+          env:
+              REGISTRY: ${{ env.REGISTRY }}
+              IMAGE_NAME: ${{ env.IMAGE_NAME }}
+              TAG: ${{ env.TAG }}
+          run: |
+              cd common
+              docker build -t $REGISTRY/$IMAGE_NAME:$TAG .
+              docker push $REGISTRY/$IMAGE_NAME:$TAG
