@@ -4,6 +4,11 @@ COPY requirements.txt ${LAMBDA_TASK_ROOT}
 
 RUN pip install -r requirements.txt
 
-COPY . ${LAMBDA_TASK_ROOT}
+RUN mkdir -p ${LAMBDA_TASK_ROOT}/recommend
+
+COPY *.py ${LAMBDA_TASK_ROOT}
+COPY recommend ${LAMBDA_TASK_ROOT}/recommend
+
+EXPOSE 8080
 
 CMD ["lambda_function.handler"]

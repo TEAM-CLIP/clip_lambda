@@ -2,40 +2,22 @@ import json
 import os
 
 import requests
-import mysql.connector
-import boto3
 
-import common.secret_manager
+import common.secret_manager as secret_manager
+import common.mysql_connector as mysql_connector
+import common.sqs_helper as sqs_helper
+import recommend.recommend as recommend
 
-
-def get_mysql_connection(properties):
-    conn = mysql.connector.connect(
-        host=properties['DB_HOST'],
-        user=properties['DB_USERNAME'],
-        password=properties['DB_PASSWORD'],
-        database=properties['DB_NAME']
-    )
-
-    return conn
-
-
-def get_request_detail(record_id, cursor):
-    select_query = "select * from recommend_request where id = %s"
-    cursor.execute(select_query, (record_id,))
-    result = cursor.fetchone()
-    return result
 
 def send_message(record_id, webhook_url):
-    db_properties = common.secret_manager.get_secret_properties("chiksnap/db")
-    conn = get_mysql_connection(db_properties)
-    cursor = conn.cursor()
+    db_properties = secret_manager.get_secret_properties("chiksnap/db")
+    connector = mysql_connector.MysqlConnector(db_properties)
 
-    print(f"record_id: {record_id}")
+    recommend_repository = recommend.RecommendRepository(connector)
 
-    request_detail = get_request_detail(record_id, cursor)
-    print(f"request_detail: {request_detail}")
-    phone_number = request_detail[1]
-    prefer_style = request_detail[2]
+    result = recommend_repository.find_by_id(record_id)
+    phone_number = result.phone_number
+    prefer_style = result.prefer_style
 
     data = {
         'text': f"""
@@ -45,13 +27,7 @@ def send_message(record_id, webhook_url):
         """.strip()
     }
 
-    print(f"send data: {data}")
-
     requests.post(webhook_url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
-
-    cursor.close()
-    conn.close()
-    print("message sent successfully")
 
 
 
@@ -59,10 +35,9 @@ def handler(event, context):
     try:
         webhook_url = os.environ['RECOMMEND_SLACK_URL']
 
-        meta_datas = event['Records']
-        for meta_data in meta_datas:
-            message = json.loads(meta_data['body'])
-            data = message['body']
+        meta_datas = sqs_helper.SQSMetaData(event)
+        for meta_data in meta_datas.get_meta_data(is_json=True):
+            data = meta_data.body['body']
             record_id = data['record_id']
             send_message(record_id, webhook_url)
 
