@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'recommend/**'
+      - '.github/workflows/Deploy_Recommend_Lambda.yml'
 
 jobs:
   deploy:
