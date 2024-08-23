@@ -7,6 +7,8 @@ import common.secret_manager as secret_manager
 import common.mysql_connector as mysql_connector
 import common.sqs_helper as sqs_helper
 import recommend.recommend as recommend
+import common.response as response
+
 
 
 def send_message(record_id, webhook_url):
@@ -30,7 +32,6 @@ def send_message(record_id, webhook_url):
     requests.post(webhook_url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
 
 
-
 def handler(event, context):
     try:
         webhook_url = os.environ['RECOMMEND_SLACK_URL']
@@ -42,13 +43,10 @@ def handler(event, context):
             send_message(record_id, webhook_url)
 
     except Exception as e:
-        print(e)
-        return {
-            'statusCode': 500,
-            'body': "error occurred while processing request"
-        }
+        return response.ResponseBuilder.status_500(body = {
+            'message': str(e)
+        }).to_dict()
 
-    return {
-        'statusCode': 200,
-        'body': 'processed successfully'
-    }
+    return response.ResponseBuilder.status_200(body = {
+        'message': 'success'
+    }).to_dict()

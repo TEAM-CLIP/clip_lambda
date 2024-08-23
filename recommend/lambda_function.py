@@ -1,14 +1,14 @@
 import json
 import os
 
-import mysql.connector
 import boto3
-from mysql.connector import custom_error_exception
 
 import common.secret_manager as secret_manager
 import common.mysql_connector as mysql_connector
 import recommend_query
-
+import common.response as response
+import common.http as http
+import common.sqs_helper as sqs_helper
 
 
 def initialize_table(connector):
@@ -31,28 +31,25 @@ def create_slack_message(record_id):
 
 def send_queue(record_id):
     message = create_slack_message(record_id)
-    sqs_client = boto3.client("sqs")
-
-    sqs_client.send_message(QueueUrl = os.environ['SLACK_SQS_URL'], MessageBody = message)
+    sqs_helper.SQSSender().send_message(queue_url = os.environ['SLACK_SQS_URL'], message = message)
 
 
 def handler(event, context):
     try:
-        request  = json.dumps(event)
+        body = http.HttpRequestParser.parse_body(event, is_json=True)
+        print(event)
+        print(body)
         db_properties = secret_manager.get_secret_properties("chiksnap/db")
         connector = mysql_connector.MysqlConnector(db_properties)
 
-        added_record_id = add_recommend_request(connector, json.loads(request))
+        added_record_id = add_recommend_request(connector, body)
         send_queue(added_record_id)
 
-    except Exception as e:
-        print(e)
-        return {
-            'statusCode': 500,
-            'body': "error occurred while processing request"
-        }
+        return response.ResponseBuilder.status_200(body={
+            "record_id": added_record_id
+        }).to_dict()
 
-    return {
-        'statusCode': 200,
-        'body': 'processed successfully'
-    }
+    except Exception as e:
+        response.ResponseBuilder.status_500(body= {
+            'message': str(e)
+        }).to_dict()
