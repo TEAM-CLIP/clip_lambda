@@ -39,6 +39,7 @@ jobs:
           REPOSITORY: ${{ env.REPOSITORY }}
           TAG: ${{ github.sha }}
         run: |
+          cd slack_notification
           docker build -t $REGISTRY/$REPOSITORY:$TAG .
           docker push $REGISTRY/$REPOSITORY:$TAG
           
