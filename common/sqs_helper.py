@@ -1,4 +1,5 @@
 import json
+import boto3
 
 
 class SQSMetaData:
@@ -15,3 +16,11 @@ class SQSMessage:
     def __init__(self, record, is_json):
         self.record = record
         self.body = json.loads(record['body']) if is_json else record['body']
+
+
+class SQSSender:
+    def __init__(self):
+        self.__sqs_client = boto3.client("sqs")
+
+    def send_message(self, queue_url, message):
+        self.__sqs_client.send_message(QueueUrl = queue_url, MessageBody = message)

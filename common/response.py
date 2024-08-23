@@ -14,7 +14,7 @@ class ResponseBuilder:
 class Response:
     def __init__(self,status_code,body):
         self.status_code = status_code
-        self.body: dict = body
+        self.body= json.dumps(body)
 
     def to_dict(self):
         return {
@@ -22,6 +22,7 @@ class Response:
             'headers': {
                 'Content-Type': 'application/json'
             },
+            'isBase64Encoded': False,
             'body': self.body
         }
 
