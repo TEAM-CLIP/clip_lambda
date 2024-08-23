@@ -4,18 +4,7 @@ import os
 import mysql.connector
 import boto3
 
-
-def get_secret(secret_id):
-    region_name = "ap-northeast-2"
-    session = boto3.session.Session()
-    secret_manager_client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-
-    secret_value = secret_manager_client.get_secret_value(SecretId=secret_id)
-
-    return secret_value['SecretString']
+import common.secret_manager as secret_manager
 
 
 def get_mysql_connection(properties):
@@ -72,9 +61,10 @@ def handler(event, context):
     try:
         request = json.dumps(event)
 
-        db_properties = get_secret("chiksnap/db")
+        # db_properties = get_secret("chiksnap/db")
+        db_properties = secret_manager.get_secret_properties("chiksnap/db")
 
-        conn = get_mysql_connection(json.loads(db_properties))
+        conn = get_mysql_connection(db_properties)
         cursor = conn.cursor()
         added_record = add_recommend_request(cursor, json.loads(request))
 

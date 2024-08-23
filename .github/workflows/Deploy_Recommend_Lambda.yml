@@ -7,6 +7,11 @@ on:
     paths:
       - 'recommend/**'
       - '.github/workflows/Deploy_Recommend_Lambda.yml'
+  workflow_run:
+    workflows:
+      - "Deploy Common Package"
+    types:
+      - completed
 
 jobs:
   deploy:

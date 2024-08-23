@@ -7,6 +7,12 @@ on:
     paths:
       - 'slack_notification/**'
       - '.github/workflows/Deploy_Slack_Notification_Lambda.yml'
+  workflow_run:
+    workflows:
+      - "Deploy Common Package"
+    types:
+      - completed
+
 
 jobs:
   deploy:

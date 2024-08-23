@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/python:3.9
+FROM public.ecr.aws/o1r5t7k5/chiksnap/common/python:3.9
 
 COPY requirements.txt ${LAMBDA_TASK_ROOT}
 
