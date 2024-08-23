@@ -29,10 +29,11 @@ class MysqlConnector:
         result = cursor.fetchall()
         return result
 
-    def execute_one(self, query, params):
+    def execute_one(self, query, params=None):
         cursor = self.__cursor
         if params is None:
             cursor.execute(query)
-        cursor.execute(query, params)
+        else:
+            cursor.execute(query, params)
         self.__conn.commit()
         return cursor.lastrowid
