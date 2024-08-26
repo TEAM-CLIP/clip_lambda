@@ -33,7 +33,7 @@ class RecommendMessageHandler:
 
         self.__message_format = """
         새로운 추천 요청이 들어왔어요! 🎉
-        - 원하는 스넵 유형: {snap_types}
+        - 원하는 스냅 유형: {snap_types}
         - 전화번호: {phone_number}
         - 선호 스타일: {prefer_style}
         """.strip()

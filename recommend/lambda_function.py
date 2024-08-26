@@ -11,9 +11,9 @@ import common.sqs_helper as sqs_helper
 
 def convert_snap_types(type_array):
     snap_type = {
-        1: "개인 스냅",
-        2: "우정 / 단체",
-        3: "커플 / 결혼"
+        0: "개인 스냅",
+        1: "우정 / 단체",
+        2: "커플 / 결혼"
     }
     users_snap_types = []
     for snap in type_array:
