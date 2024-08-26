@@ -20,7 +20,10 @@ class Response:
         return {
             'statusCode': self.status_code,
             'headers': {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
+                'Access-Control-Allow-Headers': '*'
             },
             'isBase64Encoded': False,
             'body': self.body
