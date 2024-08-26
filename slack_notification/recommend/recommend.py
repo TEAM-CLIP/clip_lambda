@@ -4,18 +4,20 @@ import requests
 import common.secret_manager as secret_manager
 import common.mysql_connector as mysql_connector
 
+
 class Recommend:
     def __init__(self, record_properties):
         self.record_id = record_properties[0]
         self.phone_number = record_properties[1]
         self.prefer_style = record_properties[2]
+        self.snap_types = json.loads(record_properties[4])
+
 
 class RecommendRepository:
     def __init__(self, connector):
         self.__connector = connector
 
         self.__find_by_id_query = "select * from recommend_request where id = %s"
-
 
     def find_by_id(self, record_id):
         query = self.__find_by_id_query
@@ -31,13 +33,13 @@ class RecommendMessageHandler:
 
         self.__message_format = """
         새로운 추천 요청이 들어왔어요! 🎉
+        - 원하는 스넵 유형: {snap_types}
         - 전화번호: {phone_number}
         - 선호 스타일: {prefer_style}
         """.strip()
 
     def __call__(self, message):
         self.handle(message)
-
 
     def handle(self, message):
         record_id = message['record_id']
@@ -49,7 +51,11 @@ class RecommendMessageHandler:
         prefer_style = result.prefer_style
 
         data = {
-            'text': self.__message_format.format(phone_number = phone_number, prefer_style = prefer_style)
+            'text': self.__message_format.format(
+                phone_number=phone_number,
+                prefer_style=prefer_style,
+                snap_types=', '.join(result.snap_types)
+            )
         }
 
         requests.post(self.__slack_url, data=json.dumps(data), headers={'Content-Type': 'application/json'})

@@ -1,8 +1,6 @@
 import json
 import os
 
-import boto3
-
 import common.secret_manager as secret_manager
 import common.mysql_connector as mysql_connector
 import recommend_query
@@ -11,13 +9,29 @@ import common.http as http
 import common.sqs_helper as sqs_helper
 
 
+def convert_snap_types(type_array):
+    snap_type = {
+        1: "개인 스냅",
+        2: "우정 / 단체",
+        3: "커플 / 결혼"
+    }
+    users_snap_types = []
+    for snap in type_array:
+        users_snap_types.append(snap_type[snap])
+    return users_snap_types
+
+
 def initialize_table(connector):
     connector.execute_one(recommend_query.create_table_query)
 
 
 def add_recommend_request(connector, message):
     initialize_table(connector)
-    return connector.execute_one(recommend_query.insert_query, (message['phone_number'], message['prefer_style']))
+    return connector.execute_one(
+        recommend_query.insert_query,
+        (message['phone_number'], message['prefer_style'], json.dumps(convert_snap_types(message['snap_types'])))
+    )
+
 
 def create_slack_message(record_id):
     message = {
@@ -29,9 +43,10 @@ def create_slack_message(record_id):
 
     return json.dumps(message)
 
+
 def send_queue(record_id):
     message = create_slack_message(record_id)
-    sqs_helper.SQSSender().send_message(queue_url = os.environ['SLACK_SQS_URL'], message = message)
+    sqs_helper.SQSSender().send_message(queue_url=os.environ['SLACK_SQS_URL'], message=message)
 
 
 def handler(event, context):
@@ -50,6 +65,6 @@ def handler(event, context):
         }).to_dict()
 
     except Exception as e:
-        response.ResponseBuilder.status_500(body= {
+        response.ResponseBuilder.status_500(body={
             'message': str(e)
         }).to_dict()
