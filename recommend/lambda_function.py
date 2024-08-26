@@ -27,9 +27,12 @@ def initialize_table(connector):
 
 def add_recommend_request(connector, message):
     initialize_table(connector)
+    snap_types = []
+    if 'snap_types' in message:
+        snap_types = message['snap_types']
     return connector.execute_one(
         recommend_query.insert_query,
-        (message['phone_number'], message['prefer_style'], json.dumps(convert_snap_types(message['snap_types'])))
+        (message['phone_number'], message['prefer_style'], json.dumps(convert_snap_types(snap_types)))
     )
 
 
