@@ -1,10 +1,11 @@
 import recommend.recommend as recommend
-
+import pre_registration.pre_registration as registration
 
 class MessageHandler:
     def __init__(self):
         self.support_message_types = {
-            "photographer_recommend": recommend.RecommendMessageHandler()
+            "photographer_recommend": recommend.RecommendMessageHandler(),
+            "pre_registration": registration.RegistrationMessageHandler()
         }
 
 
