@@ -1,0 +1,59 @@
+name: Deploy Pre Registration Lambda
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'early_notification/**'
+      - '.github/workflows/Deploy_Pre_Registration_Lambda.yml'
+  workflow_run:
+    workflows:
+      - "Deploy Common Package"
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+
+    env:
+      FUNCTION_NAME: "pre_registration"
+      REPOSITORY: ${{ secrets.REGISTRATION_REPOSITORY }}
+
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials For ECR
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "ap-northeast-2"
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push docker image to ECR
+        id: build-image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ env.REPOSITORY }}
+          TAG: ${{ github.sha }}
+        run: |
+          cd recommend
+          docker build -t $REGISTRY/$REPOSITORY:$TAG .
+          docker push $REGISTRY/$REPOSITORY:$TAG
+          
+          echo "image_name=$REGISTRY/$REPOSITORY:$TAG" >> "$GITHUB_OUTPUT"
+          
+
+      - name: Deploy Lambda
+        env:
+          IMAGE_URI: ${{ steps.build-image.outputs.image_name }}
+        run: |
+            aws lambda update-function-code --function-name $FUNCTION_NAME --image-uri $IMAGE_URI
