@@ -35,5 +35,9 @@ class MysqlConnector:
             cursor.execute(query)
         else:
             cursor.execute(query, params)
-        self.__conn.commit()
-        return cursor.lastrowid
+
+        if query.strip().lower().startswith("select"):
+            return cursor.fetchone()
+        else:
+            self.__conn.commit()
+            return cursor.lastrowid

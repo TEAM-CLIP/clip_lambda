@@ -13,3 +13,7 @@ create_table_query = """
 insert_query = """
     insert into pre_registration_request(phone_number, hangout) values (%s, %s)
     """
+
+check_exist_query = """
+    select id from pre_registration_request where phone_number = %s LIMIT 1;
+"""

@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'early_notification/**'
+      - 'pre_registration/**'
       - '.github/workflows/Deploy_Pre_Registration_Lambda.yml'
   workflow_run:
     workflows:
