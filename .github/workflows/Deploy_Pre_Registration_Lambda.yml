@@ -45,7 +45,7 @@ jobs:
           REPOSITORY: ${{ env.REPOSITORY }}
           TAG: ${{ github.sha }}
         run: |
-          cd recommend
+          cd pre_registration
           docker build -t $REGISTRY/$REPOSITORY:$TAG .
           docker push $REGISTRY/$REPOSITORY:$TAG
           
