@@ -16,7 +16,7 @@ class RegistrationRepository:
     def __init__(self, connector):
         self.__connector = connector
 
-        self.__find_by_id_query = "select * from pre_registration_request where id = %s"
+        self.__find_by_id_query = "select id,phone_number,hangout from pre_registration_request where id = %s"
 
     def find_by_id(self, record_id):
         query = self.__find_by_id_query
