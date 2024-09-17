@@ -33,7 +33,7 @@ class RegistrationMessageHandler:
         self.__message_format = """
         새로운 사전 신청이 들어왔어요! 🎉
         - 전화번호: {phone_number}
-        - 단골로 지정할 식당: {hagout}
+        - 단골로 지정할 식당: {hangout}
         """.strip()
 
     def __call__(self, message):
