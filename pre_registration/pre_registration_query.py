@@ -15,5 +15,5 @@ insert_query = """
     """
 
 check_exist_query = """
-    select id from pre_registration_request where phone_number = %s LIMIT 1;
+    select id from pre_registration_request where phone_number = %s and hangout = %s LIMIT 1;
 """
