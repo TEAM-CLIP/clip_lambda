@@ -1,1 +1,1 @@
-ChickSnap
+팀 클립의 MVP 모음
