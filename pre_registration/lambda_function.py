@@ -19,10 +19,10 @@ def add_pre_registration_request(connector, message):
     initialize_table(connector)
 
     # 중복체크
-    if check_pre_registration_exists(connector, (message['phone_number'], message['hangout'])):
+    if check_pre_registration_exists(connector, (message['phone_number'], message['service_name'])):
         return None
 
-    return connector.execute_one(pre_registration_query.insert_query, (message['phone_number'], message['hangout']))
+    return connector.execute_one(pre_registration_query.insert_query, (message['phone_number'], message['service_name']))
 
 def create_slack_message(record_id):
     message = {
