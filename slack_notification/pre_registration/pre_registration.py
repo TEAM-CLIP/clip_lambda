@@ -9,14 +9,14 @@ class Registration:
     def __init__(self, record_properties):
         self.record_id = record_properties[0]
         self.phone_number = record_properties[1]
-        self.hangout = record_properties[2]
+        self.service_name = record_properties[2]
 
 
 class RegistrationRepository:
     def __init__(self, connector):
         self.__connector = connector
 
-        self.__find_by_id_query = "select id,phone_number,hangout from pre_registration_request where id = %s"
+        self.__find_by_id_query = "select id,phone_number,service_name from pre_registration_request where id = %s"
 
     def find_by_id(self, record_id):
         query = self.__find_by_id_query
@@ -33,7 +33,7 @@ class RegistrationMessageHandler:
         self.__message_format = """
         새로운 사전 신청이 들어왔어요! 🎉
         - 전화번호: {phone_number}
-        - 단골로 지정할 식당: {hangout}
+        - 서비스명: {service_name}
         """.strip()
 
     def __call__(self, message):
@@ -46,12 +46,12 @@ class RegistrationMessageHandler:
 
         result = registration_repository.find_by_id(record_id)
         phone_number = result.phone_number
-        hangout = result.hangout
+        service_name = result.service_name
 
         data = {
             'text': self.__message_format.format(
                 phone_number=phone_number,
-                hangout=hangout,
+                service_name=service_name,
             )
         }
 
